@@ -159,7 +159,16 @@ spec:
           image: "{{ .Values.master.image }}:{{ .Values.master.tag }}"
 {{- end }}
           imagePullPolicy: "{{ .Values.master.imagePullPolicy }}"
-          {{- if .Values.master.useSecurity }}
+          {{- if .Values.master.selfHttps.httpsKeyStoreEnable }}
+          {{- $httpsJKSFilePath :=  printf "%s/%s" .Values.master.selfHttps.httpsKeyStorePath .Values.master.selfHttps.httpsKeyStoreFile -}}
+              {{- if .Values.master.useSecurity }} 
+ #         command: ["tail"]
+#          args: ["-f", "/dev/null"]
+          args: [ "--argumentsRealm.passwd.$(ADMIN_USER)=$(ADMIN_PASSWORD)",  "--argumentsRealm.roles.$(ADMIN_USER)=admin", "--httpPort=8080", "--httpsPort={{.Values.master.selfHttps.httpsPort}}", '--httpsKeyStore={{ $httpsJKSFilePath }}', "--httpsKeyStorePassword=$(HTTPS_KEYSTORE_PASSWORD)" ]
+              {{- else }}
+          args: [ "--httpPort=-1", "--httpsPort={{.Values.master.selfHttps.httpsPort}}", '--httpsKeyStore={{ $httpsJKSFilePath | quote }}', "--httpsKeyStorePassword=$(HTTPS_KEYSTORE_PASSWORD)" ]
+              {{- end }}
+          {{- else if .Values.master.useSecurity }}
           args: [ "--argumentsRealm.passwd.$(ADMIN_USER)=$(ADMIN_PASSWORD)",  "--argumentsRealm.roles.$(ADMIN_USER)=admin"]
           {{- end }}
           {{- if .Values.master.lifecycle }}
@@ -194,6 +203,14 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
+            {{- if .Values.master.selfHttps.httpsKeyStoreEnable }}
+            - name: HTTPS_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "jenkins.fullname" . }}-https-jks
+                  key: {{ "https-jks-password" | quote }}
+            {{- end }}
+
             {{- if .Values.master.containerEnv }}
 {{ toYaml .Values.master.containerEnv | indent 12 }}
             {{- end }}
@@ -242,6 +259,8 @@ spec:
 {{- if .Values.persistence.mounts }}
 {{ toYaml .Values.persistence.mounts | indent 12 }}
 {{- end }}
+            - mountPath: {{ .Values.master.selfHttps.httpsKeyStorePath }}
+              name: jenkins-https-keystore 
             - mountPath: /tmp
               name: tmp
             - mountPath: /var/jenkins_home
@@ -378,6 +397,16 @@ spec:
       - name: sc-config-volume
         emptyDir: {}
       {{- end }}
+
+      {{- if .Values.master.selfHttps.httpsKeyStoreEnable }}
+      - name: jenkins-https-keystore
+        secret: 
+          secretName: {{ template "jenkins.fullname" . }}-https-jks
+          items:
+          - key: jenkins-jks-file
+            path: {{ .Values.master.selfHttps.httpsKeyStoreFile }}
+      {{- end }}
+
 {{- if .Values.master.imagePullSecretName }}
       imagePullSecrets:
       - name: {{ .Values.master.imagePullSecretName }}
