@@ -14,14 +14,14 @@
 clusterZone: "cluster.local"
 
 master:
-  selfHttps:
-      httpsKeyStoreEnable: true
-      httpsPort: 4443
-      httpsKeyStorePath: "/var/jenkins_keystore"
-      httpsKeyStoreFile: "keystore.jks"
-      httpsKeyStorePassword: "changeit"
+  httpsKeyStore:
+      enable: false
+      httpPort: 8080
+      path: "/var/jenkins_keystore"
+      fileName: "keystore.jks"
+      password: "changeit"
       # Convert keystore.jks files content to base64 ( cat keystore.jks | base64 ) and put the output here
-      jenkinsKeyStoreBase64Encoded: ''
+      jenkinsKeyStoreBase64Encoded: '' 
   # Used for label app.kubernetes.io/component
   componentName: "jenkins-master"
   image: "jenkins/jenkins"
