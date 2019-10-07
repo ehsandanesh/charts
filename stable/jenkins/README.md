@@ -166,7 +166,7 @@ The following tables list the configurable parameters of the Jenkins chart and t
 | `master.priorityClassName`        | The name of a `priorityClass` to apply to the master pod | Not set               |
 | `master.testEnabled`              | Can be used to disable rendering test resources when using helm template | `true`                         |
 | `master.httpsKeyStore.enable`     | Enables https keystore on jenkins master      | `false`      | 
-| `master.httpsKeyStore.httpPort`   | Http Port that Jenkins should listen on along with https, it also serves liveness and readiness probs port. When https keystore is enabled servicePort and targetPort will be used as https port  | `8080`   |
+| `master.httpsKeyStore.httpPort`   | Http Port that Jenkins should listen on along with https, it also serves liveness and readiness probs port. When https keystore is enabled servicePort and targetPort will be used as https port  | `8081`   |
 | `master.httpsKeyStore.path`       | Path of https keystore file                  |     `/var/jenkins_keystore`     |
 | `master.httpsKeyStore.fileName`  | Jenkins keystore filename which will apear under master.httpsKeyStore.path      | `keystore.jks` |
 | `master.httpsKeyStore.password`   | Jenkins keystore password                                           | `changeit` |
@@ -527,7 +527,7 @@ After enabling `httpsKeyStore.enable` make sure that `httpPort` and `targetPort`
 master:
    httpsKeyStore:
        enable: true
-       httpPort: 8080
+       httpPort: 8081
        path: "/var/jenkins_keystore"
        fileName: "keystore.jks"
        password: "changeit"
